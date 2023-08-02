@@ -107,7 +107,7 @@ export class UserService {
       throw new HttpException('user does not exist', HttpStatus.BAD_REQUEST);
     }
 
-    const userReq = req.user;
+    const userReq = req.userID;
     const userId = userReq.id;
 
     if (userId !== user.id) {
@@ -155,7 +155,7 @@ export class UserService {
       throw new HttpException('user does not exist', HttpStatus.BAD_REQUEST);
     }
 
-    const userId = req.user.id;
+    const userId = req.userID.id;
     const userRole = await this.checkUserById(userId);
 
     if (userId !== user.id && userRole.roles !== UserRoles.ADMIN) {

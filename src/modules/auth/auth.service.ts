@@ -178,7 +178,6 @@ export class AuthService {
 
   async logoutUser(req: Request, res: Response) {
     const token = req.cookies.jwt;
-    console.log(req.user);
 
     if (!token) {
       return { message: 'user logged out' };

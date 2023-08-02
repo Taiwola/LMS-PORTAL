@@ -12,6 +12,7 @@ import { UploadService } from './modules/service/upload/upload.service';
 import { MailService } from './modules/service/mailer/mailer.service';
 import { ServiceModule } from './modules/service/service.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { GoogleService } from './modules/service/google/google.service';
 
 @Module({
   imports: [
@@ -34,6 +35,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
     ServiceModule,
   ],
   controllers: [AppController],
-  providers: [AppService, UploadService, MailService],
+  providers: [AppService, UploadService, MailService, GoogleService],
 })
 export class AppModule {}
