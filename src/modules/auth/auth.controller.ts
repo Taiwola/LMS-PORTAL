@@ -1,4 +1,14 @@
-import { Controller, Post, Body, Res, Req, Param, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Res,
+  Req,
+  Param,
+  Patch,
+  Get,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import {
@@ -6,6 +16,7 @@ import {
   forgotPasswordInterface,
 } from './interfaces/auth.interface';
 import { Response, Request } from 'express';
+import { GoogleOAuthGuard } from '../../common/guard/google.auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -48,5 +59,16 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     return await this.authService.logoutUser(req, res);
+  }
+
+  @Get('google')
+  @UseGuards(GoogleOAuthGuard)
+  // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+  async googleAuth(@Req() req: Request) {}
+
+  @Get('google-redirect')
+  @UseGuards(GoogleOAuthGuard)
+  googleAuthRedirect(@Req() req: Request) {
+    return this.authService.googleLogin(req);
   }
 }
