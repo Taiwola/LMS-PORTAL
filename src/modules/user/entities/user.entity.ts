@@ -1,13 +1,16 @@
+import { Tutorial } from '../../tutorial/entities/tutorial.entity';
 import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
+  OneToMany,
 } from 'typeorm';
 
 export enum UserRoles {
   ADMIN = 'Admin',
   USER = 'User',
+  tutor = 'Tutor',
 }
 
 @Entity()
@@ -24,6 +27,11 @@ export class User {
     type: 'varchar',
   })
   lastname: string;
+
+  @Column({
+    type: 'varchar',
+  })
+  about_me: string;
 
   @Column({
     type: 'numeric',
@@ -63,6 +71,9 @@ export class User {
     type: 'varchar',
   })
   profession: string;
+
+  @OneToMany(() => Tutorial, (tutorial) => tutorial.tutor)
+  tutorial: Tutorial[];
 
   @CreateDateColumn()
   created_at: Date;

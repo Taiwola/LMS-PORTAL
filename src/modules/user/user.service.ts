@@ -29,6 +29,7 @@ export class UserService {
   async checkUserById(id: string) {
     const user = await this.userRepository.findOne({
       where: { id: id },
+      relations: ['tutorial'],
     });
     return user;
   }
@@ -81,6 +82,25 @@ export class UserService {
     const savedUser = await this.userRepository.save(user);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...result } = savedUser;
+    return result;
+  }
+
+  async createTutor(createTutor: CreateUserDto) {
+    const { email } = createTutor;
+    const emailExist = await this.checkUserExist(email);
+    if (emailExist) {
+      throw new HttpException(
+        'can not use this email, already in use',
+        HttpStatus.AMBIGUOUS,
+      );
+    }
+    const tutor = this.userRepository.create({
+      ...createTutor,
+      roles: UserRoles.tutor,
+    });
+    const saveTutor = await this.userRepository.save(tutor);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...result } = saveTutor;
     return result;
   }
 

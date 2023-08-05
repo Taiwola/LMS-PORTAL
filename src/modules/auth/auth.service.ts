@@ -68,6 +68,17 @@ export class AuthService {
     };
   }
 
+  async createTutor(createAuthDto: CreateAuthDto) {
+    const { password } = createAuthDto;
+    const hashpwd = await this.hashpwd(password);
+    createAuthDto.password = hashpwd;
+    const tutor = await this.userService.createTutor(createAuthDto);
+    return {
+      message: 'tutor created',
+      data: tutor,
+    };
+  }
+
   async forgotPassword(forgotPwd: forgotPasswordInterface) {
     const { email } = forgotPwd;
     const user = await this.userService.checkUserExist(email);
