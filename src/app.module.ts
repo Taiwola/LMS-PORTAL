@@ -44,10 +44,11 @@ import { diskStorage } from 'multer';
     LessonModule,
     MulterModule.registerAsync({
       imports: [ConfigModule],
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       useFactory: async (configService: ConfigService) => ({
-        dest: configService.get<string>('MULTER_DEST'),
+        dest: process.env.MULTER_DEST,
         storage: diskStorage({
-          destination: configService.get<string>('MULTER_DEST'),
+          destination: process.env.MULTER_DEST,
           filename(req, file, callback) {
             const randomName = Array(32)
               .fill(null)

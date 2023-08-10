@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  Column,
+  CreateDateColumn,
+} from 'typeorm';
 import { Tutorial } from '../../tutorial/entities/tutorial.entity';
 
 @Entity()
@@ -28,6 +34,15 @@ export class Lesson {
   @Column({ nullable: true, type: 'text' })
   document: string | null;
 
+  @Column({ nullable: true, type: 'text' })
+  link: string | null;
+
   @ManyToOne(() => Tutorial, (tutorial) => tutorial.lessons)
   tutorial: Tutorial;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @CreateDateColumn()
+  updated_at: Date;
 }

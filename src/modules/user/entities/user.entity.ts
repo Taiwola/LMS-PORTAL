@@ -30,6 +30,7 @@ export class User {
 
   @Column({
     type: 'varchar',
+    nullable: true,
   })
   about_me: string;
 
@@ -40,7 +41,6 @@ export class User {
   mobile: number;
 
   @Column({
-    unique: true,
     type: 'varchar',
   })
   email: string;

@@ -30,8 +30,9 @@ export class Tutorial {
   content: string;
 
   @Column({
-    type: 'simple-array',
+    type: 'varchar',
     array: true,
+    nullable: true,
   })
   keywords: string[];
 

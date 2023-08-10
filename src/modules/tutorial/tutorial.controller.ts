@@ -20,6 +20,7 @@ import { UpdateTutorialDto } from './dto/update-tutorial.dto';
 import { Roles } from '../auth/decorators/auth.decorator';
 import { UserRoles } from '../user/entities/user.entity';
 import { RolesGuard } from '../auth/guard/roles.guard';
+import { TutorialInterface } from './interfaces/tutorial.interfaces';
 
 @Controller('tutorial')
 export class TutorialController {
@@ -37,7 +38,7 @@ export class TutorialController {
     return await this.tutorialService.create(createTut, req, image);
   }
 
-  @Post('update/:id')
+  @Patch('update/:id')
   @Roles(UserRoles.ADMIN, UserRoles.tutor)
   @UseGuards(RolesGuard)
   @UseInterceptors(FileInterceptor('image'))
@@ -71,14 +72,14 @@ export class TutorialController {
     return await this.tutorialService.changeCategory(id, updateTut, req);
   }
 
-  @Patch('update/keywords/:id')
+  @Patch('remove/keywords/:id')
   @Roles(UserRoles.ADMIN, UserRoles.tutor)
   @UseGuards(RolesGuard)
-  async addKeywords(
+  async removeKeywords(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateTut: UpdateTutorialDto,
+    @Body() keywords: TutorialInterface,
   ) {
-    return await this.tutorialService.addKeywords(id, updateTut);
+    return await this.tutorialService.removeKeywords(id, keywords);
   }
 
   @Delete('delete/:id')

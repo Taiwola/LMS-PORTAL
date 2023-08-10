@@ -20,9 +20,7 @@ export class CreateTutorialDto {
   content: string;
   @IsArray()
   keywords: string[];
-  @IsString()
-  @IsNotEmpty()
-  image: string;
+
   @IsString()
   @IsNotEmpty()
   category: string;

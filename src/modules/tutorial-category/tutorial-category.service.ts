@@ -23,6 +23,7 @@ export class TutorialCategoryService {
   async findCatId(id: string) {
     const category = await this.categoryRepository.findOne({
       where: { id: id },
+      relations: ['tutorial'],
     });
 
     return category;
@@ -58,7 +59,7 @@ export class TutorialCategoryService {
   }
 
   async findAll() {
-    return await this.findAllCategory();
+    return await this.findAllCatWoRel();
   }
 
   async findOne(id: string) {

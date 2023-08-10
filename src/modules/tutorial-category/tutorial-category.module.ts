@@ -5,11 +5,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { TutorialCategory } from './entities/tutorial-category.entity';
 import { jwtConfig } from '../../config/jwt.config';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([TutorialCategory]),
     JwtModule.registerAsync(jwtConfig),
+    UserModule,
   ],
   controllers: [TutorialCategoryController],
   providers: [TutorialCategoryService],

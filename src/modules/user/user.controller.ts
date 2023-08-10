@@ -41,8 +41,29 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @Get('all/admin')
+  @Roles(UserRoles.ADMIN)
+  @UseGuards(RolesGuard)
+  async findAllAdmin() {
+    return await this.userService.findAllAdmin();
+  }
+
+  @Get('all/tutor')
+  @Roles(UserRoles.ADMIN)
+  @UseGuards(RolesGuard)
+  async findAlltutor() {
+    return await this.userService.findAllTutor();
+  }
+
+  @Get('all/user')
+  @Roles(UserRoles.ADMIN)
+  @UseGuards(RolesGuard)
+  async findAllUser() {
+    return await this.userService.findAllUser();
+  }
+
   @Get(':id')
-  @Roles(UserRoles.ADMIN, UserRoles.USER)
+  @Roles(UserRoles.ADMIN, UserRoles.USER, UserRoles.tutor)
   @UseGuards(RolesGuard)
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.userService.findOne(id);

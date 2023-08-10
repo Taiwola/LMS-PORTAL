@@ -34,7 +34,7 @@ export class AuthController {
 
   @Post('register/tutor')
   async createTutor(@Body() createAuthDto: CreateAuthDto) {
-    await this.authService.createTutor(createAuthDto);
+    return await this.authService.createTutor(createAuthDto);
   }
 
   @Post('signin')

@@ -114,6 +114,42 @@ export class UserService {
     return filterPassword;
   }
 
+  async findAllAdmin() {
+    const admins = await this.userRepository.find({
+      where: { roles: UserRoles.ADMIN },
+    });
+    const filterPassword = admins.map((admin) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...result } = admin;
+      return result;
+    });
+    return filterPassword;
+  }
+
+  async findAllTutor() {
+    const tutors = await this.userRepository.find({
+      where: { roles: UserRoles.tutor },
+    });
+    const filterPassword = tutors.map((tutor) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...result } = tutor;
+      return result;
+    });
+    return filterPassword;
+  }
+
+  async findAllUser() {
+    const users = await this.userRepository.find({
+      where: { roles: UserRoles.USER },
+    });
+    const filterPassword = users.map((user) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...result } = user;
+      return result;
+    });
+    return filterPassword;
+  }
+
   async findOne(id: string) {
     const user = await this.checkUserById(id);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

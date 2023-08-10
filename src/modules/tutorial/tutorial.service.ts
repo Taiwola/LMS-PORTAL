@@ -9,6 +9,7 @@ import { Request } from 'express';
 import { UserService } from '../user/user.service';
 import { UploadService } from '../service/upload/upload.service';
 import { UserRoles } from '../user/entities/user.entity';
+import { TutorialInterface } from './interfaces/tutorial.interfaces';
 
 @Injectable()
 export class TutorialService {
@@ -24,7 +25,7 @@ export class TutorialService {
   async findOneTutorial(id: string) {
     const tutorial = await this.tutorialRepository.findOne({
       where: { id: id },
-      relations: ['user', 'lessons'],
+      relations: ['tutor', 'lessons', 'category'],
     });
     return tutorial;
   }
@@ -35,8 +36,8 @@ export class TutorialService {
     req: Request,
     file: Express.Multer.File,
   ) {
-    const { id } = req.userID;
-    const user = await this.userService.checkUserById(id);
+    console.log(req.user, req.user.id);
+    const user = await this.userService.checkUserById(req.user.id);
     if (!user) {
       throw new HttpException('user does not exist', HttpStatus.NOT_FOUND);
     }
@@ -48,9 +49,8 @@ export class TutorialService {
       throw new HttpException('category does not exist', HttpStatus.NOT_FOUND);
     }
 
-    const { image } = createTutorial;
     let imgUrl: string | null;
-    if (!image) {
+    if (!file) {
       imgUrl = null;
     } else {
       const img = await this.uploadService.uploadFile(file);
@@ -85,7 +85,9 @@ export class TutorialService {
   }
 
   async findOne(id: string) {
-    const tutorial = await this.findOneTutorial(id);
+    const tutorial = await this.tutorialRepository.findOne({
+      where: { id: id },
+    });
     return tutorial;
   }
 
@@ -100,7 +102,7 @@ export class TutorialService {
       throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
     }
 
-    const userId = req.userID;
+    const userId = req.user;
     const user = await this.userService.checkUserById(userId.id);
     if (!user) {
       throw new HttpException('user does not exist', HttpStatus.NOT_FOUND);
@@ -117,14 +119,15 @@ export class TutorialService {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
 
-    const { image } = updateTutorial;
     let imgUrl: string;
-    if (!image) {
+    if (!file) {
       imgUrl = findTut.image;
     } else {
       const img = await this.uploadService.uploadFile(file);
       imgUrl = img.url as string;
     }
+
+    const updatedKeywords = [...findTut.keywords, ...updateTutorial.keywords];
 
     const updateTut = await this.tutorialRepository
       .createQueryBuilder()
@@ -132,7 +135,8 @@ export class TutorialService {
       .set({
         title: updateTutorial.title,
         topicName: updateTutorial.topicName,
-        keywords: updateTutorial.keywords,
+        keywords: updatedKeywords,
+        content: updateTutorial.content,
         image: imgUrl,
       })
       .where('id = :id', { id: id })
@@ -206,7 +210,7 @@ export class TutorialService {
   ) {
     const findTut = await this.findOneTutorial(id);
     const { category } = updateTutorial;
-    const userId = req.userID.id;
+    const userId = req.user.id;
     const user = await this.userService.checkUserById(userId);
     const findCat = await this.categoryService.findCategory(category);
     if (!user) {
@@ -232,7 +236,7 @@ export class TutorialService {
 
   async remove(id: string, req: Request) {
     const findTut = await this.findOneTutorial(id);
-    const userId = req.userID.id;
+    const userId = req.user.id;
     const user = await this.userService.checkUserById(userId);
     if (!findTut) {
       throw new HttpException('Tutorial not found', HttpStatus.NOT_FOUND);
@@ -252,27 +256,22 @@ export class TutorialService {
     };
   }
 
-  async addKeywords(id: string, updateTutorial: UpdateTutorialDto) {
+  async removeKeywords(id: string, keywords: TutorialInterface) {
     const tut = await this.findOneTutorial(id);
     if (!tut) {
       throw new HttpException('Tutorial not found', HttpStatus.NOT_FOUND);
     }
-
-    const updateKeyWord = await this.tutorialRepository
-      .createQueryBuilder()
-      .update(Tutorial)
-      .set({ keywords: updateTutorial.keywords })
-      .where('id = :id', { id: id })
-      .execute();
-
-    if (updateKeyWord.affected >= 1) {
-      const updatedTut = await this.findOneTutorial(id);
-      return updatedTut;
+    const word = keywords.keywords.toString();
+    const updateKeywords = tut.keywords.filter((keyword) => keyword !== word);
+    const updatedTut = await this.tutorialRepository.update(
+      { id: tut.id },
+      { keywords: updateKeywords },
+    );
+    if (updatedTut.affected >= 1) {
+      const updateTut = await this.findOneTutorial(id);
+      return updateTut;
     } else {
-      throw new HttpException(
-        'Internal Server Error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new HttpException('unable to update', HttpStatus.BAD_REQUEST);
     }
   }
 }
