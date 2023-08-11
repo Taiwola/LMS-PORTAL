@@ -13,9 +13,14 @@ export class Lesson {
   id: string;
 
   @Column({
+    type: 'varchar',
+  })
+  title: string;
+
+  @Column({
     nullable: true,
     array: true,
-    type: 'simple-array',
+    type: 'varchar',
   })
   images: string[] | null;
 

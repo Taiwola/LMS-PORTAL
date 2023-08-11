@@ -26,19 +26,22 @@ export class LessonService {
     image: Express.Multer.File,
     images: Express.Multer.File[],
     video: Express.Multer.File,
+    document: Express.Multer.File,
   ): Promise<Lesson> {
-    const tut = await this.tutorialService.findOne(id);
-    const userId = req.userID.id;
+    const tut = await this.tutorialService.findOneTutorial(id);
+    const userId = req.user.id;
     if (!tut) {
       throw new HttpException('Tutorial Not Found', HttpStatus.NOT_FOUND);
     }
+
     if (userId !== tut.tutor.id) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
 
     let imgUrl: string | null;
     if (image) {
-      const img = await this.uploadService.uploadFile(image);
+      console.log(image);
+      const img = await this.uploadService.upload(image);
       imgUrl = img.url as string;
     } else {
       imgUrl = null;
@@ -62,13 +65,23 @@ export class LessonService {
       vidUrl = null;
     }
 
+    let documentLink: string | null;
+    if (document) {
+      const doc = await this.uploadService.uploadDoc(document);
+      documentLink = doc.url as string;
+    } else {
+      documentLink = null;
+    }
+
     const lesson = this.lessonRepository.create({
+      title: createLessonDto.title,
       image: imgUrl,
       images: imgArray,
       video: vidUrl,
       link: createLessonDto.link,
       text: createLessonDto.text,
       tutorial: tut,
+      document: documentLink,
     });
 
     const savedLesson = await this.lessonRepository.save(lesson);
@@ -76,13 +89,16 @@ export class LessonService {
   }
 
   async findAll(): Promise<Lesson[]> {
-    const lesson = await this.lessonRepository.find();
+    const lesson = await this.lessonRepository.find({
+      relations: ['tutorial'],
+    });
     return lesson;
   }
 
   async findOne(id: string): Promise<Lesson> {
     const lesson = await this.lessonRepository.findOne({
       where: { id: id },
+      relations: ['tutorial'],
     });
     return lesson;
   }
@@ -94,24 +110,32 @@ export class LessonService {
     image: Express.Multer.File,
     images: Express.Multer.File[],
     video: Express.Multer.File,
+    document: Express.Multer.File,
   ): Promise<Lesson> {
     const lesson = await this.findOne(id);
     if (!lesson) {
       throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
     }
-    const tutorId = lesson.tutorial.tutor.id;
-    if (req.userID.id !== tutorId) {
+    const tut = await this.tutorialService.findOneTutorial(lesson.tutorial.id);
+    const tutorId = tut.tutor.id;
+    if (req.user.id !== tutorId) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
 
-    const img = await this.uploadService.uploadFile(image);
-    const imgUrl = img.url as string;
-    const imgs = await this.uploadService.uploadMultipleFiles(images);
-    const imgArray = imgs.map((imgs) => {
-      return imgs.url as string;
-    });
-    const vid = await this.uploadService.uploadVideo(video);
-    const vidUrl = vid.url as string;
+    const img = image ? await this.uploadService.upload(image) : null;
+    const imgUrl = img ? (img.url as string) : lesson.image;
+    const doc = document ? await this.uploadService.uploadDoc(document) : null;
+    const docLink = doc ? (doc.url as string) : lesson.document;
+    const imgs = images
+      ? await this.uploadService.uploadMultipleFiles(images)
+      : null;
+    const imgArray = imgs
+      ? imgs.map((imgs) => {
+          return imgs.url as string;
+        })
+      : lesson.images;
+    const vid = video ? await this.uploadService.uploadVideo(video) : null;
+    const vidUrl = vid ? (vid.url as string) : lesson.video;
     const updateLesson = await this.lessonRepository
       .createQueryBuilder()
       .update(Lesson)
@@ -119,8 +143,10 @@ export class LessonService {
         video: vidUrl,
         image: imgUrl,
         images: imgArray,
+        document: docLink,
         text: updateLessonDto.text,
         link: updateLessonDto.link,
+        title: updateLessonDto.title,
       })
       .where('id = :id', { id: id })
       .execute();
@@ -139,12 +165,15 @@ export class LessonService {
   async remove(id: string, req: Request) {
     const lesson = await this.lessonRepository.findOne({
       where: { id: id },
+      relations: ['tutorial'],
     });
-    const user = await this.userService.checkUserById(req.userID.id);
+    const user = await this.userService.checkUserById(req.user.id);
     if (!lesson) {
       throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
     }
-    const tutorId = lesson.tutorial.tutor.id;
+
+    const tut = await this.tutorialService.findOneTutorial(lesson.tutorial.id);
+    const tutorId = tut.tutor.id;
     if (user.id !== tutorId && user.roles !== UserRoles.ADMIN) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }

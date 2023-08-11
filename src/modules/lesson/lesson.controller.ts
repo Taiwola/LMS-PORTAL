@@ -29,6 +29,7 @@ export class LessonController {
       { name: 'image', maxCount: 1 },
       { name: 'images', maxCount: 6 },
       { name: 'video', maxCount: 1 },
+      { name: 'document', maxCount: 1 },
     ]),
   )
   create(
@@ -41,12 +42,20 @@ export class LessonController {
       }),
     )
     files: {
-      image: Express.Multer.File;
+      image: Express.Multer.File[];
       images: Express.Multer.File[];
-      video: Express.Multer.File;
+      video: Express.Multer.File[];
+      document: Express.Multer.File[];
     },
   ) {
-    const { image, images, video } = files;
+    const video = files.video ? files.video[0] : null;
+    const image = files.image ? files.image[0] : null;
+    const document = files.document ? files.document[0] : null;
+    const images = files.images
+      ? files.images.map((image) => {
+          return image;
+        })
+      : null;
     return this.lessonService.create(
       id,
       createLessonDto,
@@ -54,10 +63,11 @@ export class LessonController {
       image,
       images,
       video,
+      document,
     );
   }
 
-  @Get()
+  @Get('all')
   findAll() {
     return this.lessonService.findAll();
   }
@@ -67,30 +77,35 @@ export class LessonController {
     return this.lessonService.findOne(id);
   }
 
-  @Patch(':id')
+  @Patch('update/:id')
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'image', maxCount: 1 },
       { name: 'images', maxCount: 6 },
       { name: 'video', maxCount: 1 },
+      { name: 'document', maxCount: 1 },
     ]),
   )
   update(
     @Param('id') id: string,
     @Body() updateLessonDto: UpdateLessonDto,
     @Req() req: Request,
-    @UploadedFiles(
-      new ParseFilePipeBuilder().build({
-        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-      }),
-    )
+    @UploadedFiles()
     files: {
-      image: Express.Multer.File;
+      image: Express.Multer.File[];
       images: Express.Multer.File[];
-      video: Express.Multer.File;
+      video: Express.Multer.File[];
+      document: Express.Multer.File[];
     },
   ) {
-    const { image, images, video } = files;
+    const video = files.video ? files.video[0] : null;
+    const image = files.image ? files.image[0] : null;
+    const document = files.document ? files.document[0] : null;
+    const images = files.images
+      ? files.images.map((image) => {
+          return image;
+        })
+      : null;
     return this.lessonService.update(
       id,
       updateLessonDto,
@@ -98,10 +113,11 @@ export class LessonController {
       image,
       images,
       video,
+      document,
     );
   }
 
-  @Delete(':id')
+  @Delete('delete/:id')
   remove(@Param('id') id: string, @Req() req: Request) {
     return this.lessonService.remove(id, req);
   }

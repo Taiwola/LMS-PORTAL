@@ -5,6 +5,7 @@ import {
   v2 as cloudinary,
 } from 'cloudinary';
 import * as streamifier from 'streamifier';
+import * as fs from 'fs';
 
 export type CloudinaryType = UploadApiErrorResponse | UploadApiResponse;
 
@@ -35,6 +36,7 @@ export class UploadService {
             reject(error);
           } else {
             console.log('file uploaded successfully');
+            fs.unlinkSync(file.path);
             resolve(result);
           }
         },
@@ -64,6 +66,27 @@ export class UploadService {
             reject(error);
           } else {
             console.log('Video uploaded successfully');
+            fs.unlinkSync(file.path);
+            resolve(result);
+          }
+        },
+      );
+    });
+  }
+
+  uploadDoc(file: Express.Multer.File): Promise<any> {
+    return new Promise((resolve, reject) => {
+      cloudinary.uploader.upload(
+        file.path,
+        { resource_type: 'raw' },
+        function (err, result) {
+          if (err) {
+            reject(err); // Reject the promise if there's an error
+          } else {
+            // Delete the local file after successful upload
+            fs.unlinkSync(file.path);
+
+            // Resolve the promise with the Cloudinary URL
             resolve(result);
           }
         },

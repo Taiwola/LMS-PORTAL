@@ -1,4 +1,5 @@
 import { Tutorial } from '../../tutorial/entities/tutorial.entity';
+import { Course } from '../../course/entities/course.entity';
 import {
   Entity,
   Column,
@@ -74,6 +75,9 @@ export class User {
 
   @OneToMany(() => Tutorial, (tutorial) => tutorial.tutor)
   tutorial: Tutorial[];
+
+  @OneToMany(() => Course, (course) => course.user)
+  courses: Course[];
 
   @CreateDateColumn()
   created_at: Date;

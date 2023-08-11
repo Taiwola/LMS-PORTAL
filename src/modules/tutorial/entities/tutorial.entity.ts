@@ -5,10 +5,12 @@ import {
   CreateDateColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
 } from 'typeorm';
 import { TutorialCategory } from '../../tutorial-category/entities/tutorial-category.entity';
 import { Lesson } from '../../lesson/entities/lesson.entity';
 import { User } from '../../user/entities/user.entity';
+import { Course } from '../../course/entities/course.entity';
 
 export enum TutorialType {
   FREE = 'Free',
@@ -64,6 +66,9 @@ export class Tutorial {
 
   @OneToMany(() => Lesson, (lesson) => lesson.tutorial)
   lessons: Lesson[];
+
+  @OneToOne(() => Course, (course) => course.tutorial)
+  course: Course;
 
   @CreateDateColumn()
   created_at: Date;

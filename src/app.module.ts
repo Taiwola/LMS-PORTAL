@@ -19,6 +19,7 @@ import { LessonModule } from './modules/lesson/lesson.module';
 import { Cloudinary } from './config/cloudinary/cloudinary';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { CourseModule } from './modules/course/course.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { diskStorage } from 'multer';
         }),
       }),
     }),
+    CourseModule,
   ],
   controllers: [AppController],
   providers: [
