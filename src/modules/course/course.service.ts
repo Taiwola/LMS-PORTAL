@@ -49,6 +49,7 @@ export class CourseService {
   async findAll(req: Request) {
     const course = await this.courseRepository.find({
       where: { user: { id: req.user.id } },
+      relations: ['user', 'tutorial'],
     });
     return course;
   }
